@@ -1,5 +1,6 @@
 package ru.clevertec.model.datasource;
 
+import ru.clevertec.model.entity.Discount;
 import ru.clevertec.model.entity.DiscountCard;
 import ru.clevertec.model.entity.Product;
 
@@ -15,7 +16,8 @@ public class CollectionDataSource {
 
     private CollectionDataSource() {
         var tempProducts = new ArrayList<Product>();
-        tempProducts.add(new Product.Builder().id(0L).name("Milk").price(BigDecimal.valueOf(1.9)).build());
+        tempProducts.add(new Product.Builder().id(0L).name("Milk").price(BigDecimal.valueOf(1.9))
+                .discount(new Discount.Builder().discountQuantity(5).discount(10).build()).build());
         tempProducts.add(new Product.Builder().id(1L).name("Bread").price(BigDecimal.valueOf(0.99)).build());
         tempProducts.add(new Product.Builder().id(2L).name("Eggs").price(BigDecimal.valueOf(3.2)).build());
         products = tempProducts;

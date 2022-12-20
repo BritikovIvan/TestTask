@@ -9,16 +9,16 @@ public class Check {
     private Long id;
     private List<CheckProduct> products;
     private DiscountCard card;
+    private BigDecimal price;
     private BigDecimal totalPrice;
-    private BigDecimal discountPrice;
     private LocalDateTime dateTime;
 
     private Check(Builder builder) {
         id = builder.id;
         products = builder.products;
         card = builder.card;
+        price = builder.price;
         totalPrice = builder.totalPrice;
-        discountPrice = builder.discountPrice;
         dateTime = builder.dateTime;
     }
 
@@ -46,20 +46,20 @@ public class Check {
         this.card = card;
     }
 
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
     public BigDecimal getTotalPrice() {
         return totalPrice;
     }
 
     public void setTotalPrice(BigDecimal totalPrice) {
         this.totalPrice = totalPrice;
-    }
-
-    public BigDecimal getDiscountPrice() {
-        return discountPrice;
-    }
-
-    public void setDiscountPrice(BigDecimal discountPrice) {
-        this.discountPrice = discountPrice;
     }
 
     public LocalDateTime getDateTime() {
@@ -89,8 +89,8 @@ public class Check {
         private Long id;
         private List<CheckProduct> products;
         private DiscountCard card;
+        private BigDecimal price;
         private BigDecimal totalPrice;
-        private BigDecimal discountPrice;
         private LocalDateTime dateTime;
 
         public Builder() {
@@ -111,13 +111,13 @@ public class Check {
             return this;
         }
 
-        public Builder totalPrice(BigDecimal totalPrice) {
-            this.totalPrice = totalPrice;
+        public Builder price(BigDecimal price) {
+            this.price = price;
             return this;
         }
 
-        public Builder discountPrice(BigDecimal discountPrice) {
-            this.discountPrice = discountPrice;
+        public Builder totalPrice(BigDecimal totalPrice) {
+            this.totalPrice = totalPrice;
             return this;
         }
 

@@ -2,8 +2,7 @@ package ru.clevertec.service.impl;
 
 import ru.clevertec.dto.CheckDto;
 import ru.clevertec.dto.CheckProductDto;
-import ru.clevertec.model.entity.Check;
-import ru.clevertec.model.entity.CheckProduct;
+import ru.clevertec.model.entity.*;
 import ru.clevertec.model.repository.DiscountCardRepository;
 import ru.clevertec.model.repository.ProductRepository;
 import ru.clevertec.service.CheckService;
@@ -29,42 +28,70 @@ public class CheckServiceImpl implements CheckService {
             return null;
         }
         var products = new ArrayList<CheckProduct>();
-
         for (CheckProductDto productDto : checkDto.getProducts()) {
             var product = productRepository.findById(productDto.getProductId());
             if (product.isEmpty()) {
                 throw new RuntimeException();
             }
-            products.add(new CheckProduct.Builder()
-                                .product(product.get())
-                                .amount(productDto.getAmount())
-                                .price(product.get().getPrice())
-                                .build());
+            products.add(createCheckProduct(product.get(), productDto.getAmount()));
         }
 
+        var price = BigDecimal.valueOf(0);
         var totalPrice = BigDecimal.valueOf(0);
+        DiscountCard discountCard = null;
 
-        for (CheckProduct checkProduct : products) {
-            totalPrice = totalPrice.add(checkProduct.getPrice().multiply(BigDecimal.valueOf(checkProduct.getAmount())));
+        if (checkDto.getDiscountCardNumber() != null) {
+            var card = cardRepository.findByNumber(checkDto.getDiscountCardNumber());
+            if (card.isEmpty()) {
+                throw new RuntimeException();
+            }
+            discountCard = card.get();
+
+            var discountAmount = BigDecimal.valueOf(0);
+            var cardDiscount = BigDecimal.valueOf(discountCard.getDiscount() / 100.0);
+            for (CheckProduct product: products) {
+                price = price.add(product.getTotalPrice());
+                if (product.getDiscount() == null) {
+                    discountAmount = discountAmount.add(product.getTotalPrice().multiply(cardDiscount));
+                }
+            }
+            totalPrice = roundPrice(price.subtract(discountAmount));
+        } else {
+            price = products.stream()
+                    .map(CheckProduct::getTotalPrice)
+                    .reduce(BigDecimal.valueOf(0), BigDecimal::add);
+            totalPrice = price;
         }
 
         var check = new Check.Builder()
                 .products(products)
+                .price(price)
                 .totalPrice(totalPrice)
-                .discountPrice(totalPrice)
                 .dateTime(LocalDateTime.now())
+                .card(discountCard)
                 .build();
         check.getProducts().forEach(product -> product.setCheck(check));
-        if (checkDto.getDiscountCardNumber() != null) {
-            var discountCard = cardRepository.findByNumber(checkDto.getDiscountCardNumber());
-            if (discountCard.isEmpty()) {
-                throw new RuntimeException();
-            }
-            check.setCard(discountCard.get());
-            var discountPriceNotRounded =check.getTotalPrice().multiply(BigDecimal.valueOf((100 - discountCard.get().getDiscount()) / 100.0));
-            check.setDiscountPrice(discountPriceNotRounded
-                    .round(new MathContext(discountPriceNotRounded.precision() - discountPriceNotRounded.scale() + 2)));
-        }
+
         return check;
+    }
+
+    private CheckProduct createCheckProduct(Product product, int amount) {
+        var totalPrice = product.getPrice().multiply(BigDecimal.valueOf(amount));
+        Discount discount = null;
+        if (product.getDiscount() != null && product.getDiscount().getDiscountQuantity() <= amount) {
+            totalPrice = roundPrice(totalPrice.multiply(BigDecimal.valueOf((100 - product.getDiscount().getDiscount()) / 100.0)));
+            discount = product.getDiscount();
+        }
+        return new CheckProduct.Builder()
+                .product(product)
+                .amount(amount)
+                .price(product.getPrice())
+                .discount(discount)
+                .totalPrice(totalPrice)
+                .build();
+    }
+
+    private BigDecimal roundPrice(BigDecimal priceNotRounded) {
+        return priceNotRounded.round(new MathContext(priceNotRounded.precision() - priceNotRounded.scale() + 2));
     }
 }

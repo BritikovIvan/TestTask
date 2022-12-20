@@ -8,7 +8,9 @@ public class CheckProduct {
     private Check check;
     private Product product;
     private int amount;
-    private BigDecimal price;
+    private BigDecimal price;   // product price
+    private BigDecimal totalPrice;  // products price with discount
+    private Discount discount;
 
     private CheckProduct(Builder builder) {
         id = builder.id;
@@ -16,6 +18,8 @@ public class CheckProduct {
         product = builder.product;
         amount = builder.amount;
         price = builder.price;
+        totalPrice = builder.totalPrice;
+        discount = builder.discount;
     }
 
     public Long getId() {
@@ -58,6 +62,22 @@ public class CheckProduct {
         this.price = price;
     }
 
+    public BigDecimal getTotalPrice() {
+        return totalPrice;
+    }
+
+    public void setTotalPrice(BigDecimal totalPrice) {
+        this.totalPrice = totalPrice;
+    }
+
+    public Discount getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(Discount discount) {
+        this.discount = discount;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -73,21 +93,14 @@ public class CheckProduct {
         return 0;
     }
 
-    @Override
-    public String toString() {
-        return "CheckProduct{" +
-                "product=" + product.getName() +
-                ", amount=" + amount +
-                ", price=" + price +
-                '}';
-    }
-
     public static final class Builder {
         private Long id;
         private Check check;
         private Product product;
         private int amount;
         private BigDecimal price;
+        private BigDecimal totalPrice;
+        private Discount discount;
 
         public Builder() {
         }
@@ -114,6 +127,16 @@ public class CheckProduct {
 
         public Builder price(BigDecimal price) {
             this.price = price;
+            return this;
+        }
+
+        public Builder totalPrice(BigDecimal totalPrice) {
+            this.totalPrice = totalPrice;
+            return this;
+        }
+
+        public Builder discount(Discount discount) {
+            this.discount = discount;
             return this;
         }
 

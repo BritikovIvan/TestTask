@@ -7,11 +7,13 @@ public class Product {
     private Long id;
     private String name;
     private BigDecimal price;
+    private Discount discount;
 
     private Product(Builder builder) {
         setId(builder.id);
         setName(builder.name);
         setPrice(builder.price);
+        setDiscount(builder.discount);
     }
 
     public Long getId() {
@@ -38,6 +40,14 @@ public class Product {
         this.price = price;
     }
 
+    public Discount getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(Discount discount) {
+        this.discount = discount;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -57,6 +67,7 @@ public class Product {
         private Long id;
         private String name;
         private BigDecimal price;
+        private Discount discount;
 
         public Builder() {
         }
@@ -73,6 +84,11 @@ public class Product {
 
         public Builder price(BigDecimal price) {
             this.price = price;
+            return this;
+        }
+
+        public Builder discount(Discount discount) {
+            this.discount = discount;
             return this;
         }
 
